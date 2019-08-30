@@ -11,6 +11,14 @@ detectlanguage.configuration.api_key = settings.DETECT_LANGUATE_KEY
 
 # endpoints for keys
 def _key_name_validator(name):
+    """
+    check whether name contains only lowercase alphabets and dot(.)s
+    using regular expression.
+    if match, return matched name,
+    and not, return error JsonResponse
+    :param name: 
+    :return: 
+    """
     pattern = re.compile('[a-z.]{1,255}')
     matcher = pattern.match(name)
     if matcher:
@@ -19,11 +27,21 @@ def _key_name_validator(name):
 
 
 def _key_get(request):
+    """
+    return all key list (id, name)
+    :param request: 
+    :return: 
+    """
     keys = list(Key.objects.values('id', 'name'))
     return JsonResponse(data={"keys": keys})
 
 
 def _key_post(request):
+    """
+    if name value in body validate, add new key & return key (id, name)
+    :param request: 
+    :return: 
+    """
     name = _key_name_validator(request.POST.get('name'))
 
     if name:
@@ -34,6 +52,11 @@ def _key_post(request):
 
 
 def keys(request):
+    """
+    return appropriate values for each request method
+    :param request: 
+    :return: 
+    """
     if request.method == 'GET':
         return _key_get(request)
 
@@ -42,6 +65,16 @@ def keys(request):
 
 
 def key_update(request, keyId):
+    """
+    1. check request method is 'PUT'
+    2. check key object to update exists
+    3. check name value in body validate
+    if all check are passed, update key name value
+     
+    :param request: 
+    :param keyId: 
+    :return: 
+    """
     if request.method != 'PUT':
         return JsonResponse(data={"error": 'key update could be only PUT request method.'})
 
@@ -58,6 +91,14 @@ def key_update(request, keyId):
 
 # endpoints for translations
 def translations(request, keyId):
+    """
+    check request method is GET
+    if GET, return translation list (id, key_id, locale, value)
+    
+    :param request: 
+    :param keyId: 
+    :return: 
+    """
     if request.method != 'GET':
         return JsonResponse(data={"error": 'translation list could be only GET request method.'})
 
@@ -67,17 +108,37 @@ def translations(request, keyId):
 
 
 def _translations_in_locale_get(request, keyId, locale):
+    """
+    return translation object which has same keyid and locale
+    :param request: 
+    :param keyId: 
+    :param locale: 
+    :return: 
+    """
     return JsonResponse(data={
         "translation": Translation.objects.filter(
             key_id=keyId, locale=locale).values('id', 'key_id', 'locale', 'value').first()})
 
 
 def _translations_in_locale_post(request, keyId, locale):
+    """
+    1. check value in body exists
+    2. check detected language locale is same with locale
+    all check are passed, add new translate and return that.
+    
+    :param request: 
+    :param keyId: 
+    :param locale: 
+    :return: 
+    """
     value = request.POST.get('value')
     if not value:
         return JsonResponse(data={"error": "translation value doesn't exist"})
 
-    locale = _language_detect(value)
+    _locale = _language_detect(value)
+    if _locale != locale:
+        return JsonResponse(data={"error": "translation locale is different"})
+    
     new_translation = Translation(
         key=Key.objects.get(id=keyId),
         locale=locale,
@@ -90,6 +151,16 @@ def _translations_in_locale_post(request, keyId, locale):
 
 
 def _translations_in_locale_put(request, keyId, locale):
+    """
+    1. check translation object to update exists
+    2. check value in body exists
+    all check are passed, update translation and return that.
+
+    :param request: 
+    :param keyId: 
+    :param locale: 
+    :return: 
+    """
     translation_to_update = Translation.objects.filter(key__id=keyId, locale=locale)
     if not translation_to_update.exists():
         return JsonResponse(data={"error": "translation doesn't exist"})
@@ -105,6 +176,11 @@ def _translations_in_locale_put(request, keyId, locale):
 
 
 def translations_in_locale(request, keyId, locale):
+    """
+    return appropriate values for each request method
+    :param request: 
+    :return: 
+    """
     if request.method == 'GET':
         return _translations_in_locale_get(request, keyId, locale)
 
