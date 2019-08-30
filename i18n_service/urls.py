@@ -21,5 +21,5 @@ from keys_and_translations.views import language_detect
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('keys/', include('keys_and_translations.urls')),
-    path('language_detect/', language_detect)
+    path('language_detect/', language_detect, name='language_detect')
 ]
