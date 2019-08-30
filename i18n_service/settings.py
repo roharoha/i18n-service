@@ -21,6 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'm=7%nu4*+d764l$9$qm^+tc0lfjxpcnz$6#q*6a3*cz4m27@o='
+DETECT_LANGUATE_KEY = '5ce093d91b18d1e71c4b83df2b997a60'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'keys_and_translations',
 ]
 
 MIDDLEWARE = [
