@@ -1,1 +1,2 @@
+detectlanguage==1.3.0
 Django==2.2.4
